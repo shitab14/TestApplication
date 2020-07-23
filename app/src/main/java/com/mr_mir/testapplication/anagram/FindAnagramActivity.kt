@@ -43,7 +43,7 @@ class FindAnagramActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-    private fun findAnagram(a: String, b: String): Boolean {
+    fun findAnagram(a: String, b: String): Boolean {
         val lengthA: Int = a.length
         if (lengthA != b.length || a.isEmpty() || b.isEmpty()) {
             return false

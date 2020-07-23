@@ -4,17 +4,16 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.media.MediaPlayer
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.mr_mir.testapplication.R
 import com.mr_mir.testapplication.UtilSingleton
+import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_video_player.*
 import kotlinx.android.synthetic.main.top_actionbar.*
 
@@ -28,7 +27,6 @@ class VideoPlayerActivity : AppCompatActivity(), View.OnClickListener,
 
     var mediaPlayer: MediaPlayer? = null
 
-    @RequiresApi(Build.VERSION_CODES.N)
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,8 +60,8 @@ class VideoPlayerActivity : AppCompatActivity(), View.OnClickListener,
     override fun onInfo(mp: MediaPlayer?, what: Int, extra: Int): Boolean {
         when (what) {
             MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START -> {
-                tvDuration.text = "${vvVideo.duration/60000}:${vvVideo.duration%60}"
                 loader.visibility = GONE
+                ivThumb.visibility = GONE
                 return true
             }
             MediaPlayer.MEDIA_INFO_BUFFERING_START -> {
@@ -78,8 +76,12 @@ class VideoPlayerActivity : AppCompatActivity(), View.OnClickListener,
         return false
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onPrepared(mp: MediaPlayer?) {
         loader.visibility = GONE
+        tvDuration.text = "${vvVideo.duration/60000}:${vvVideo.duration%60}"
+        ivThumb.visibility = VISIBLE
+        tvDuration.visibility = VISIBLE
     }
 
     override fun onCompletion(mp: MediaPlayer?) {
@@ -166,7 +168,14 @@ class VideoPlayerActivity : AppCompatActivity(), View.OnClickListener,
         noInternet.visibility = GONE
         val uri: Uri = Uri.parse(apiResponse?.data?.link.toString())
         vvVideo.setVideoURI(uri)
-        tvDuration.visibility = VISIBLE
+
+        Picasso.with(context)
+            .load(apiResponse?.data?.thumb.toString())
+            .placeholder(android.R.color.black)
+            .error(R.drawable.ic_baseline_pause_circle_filled_24)
+            .fit()
+            .noFade()
+            .into(ivThumb)
     }
 
     private fun failView() {
