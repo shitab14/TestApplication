@@ -6,8 +6,7 @@ import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
+import android.view.View.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -17,7 +16,7 @@ import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_video_player.*
 import kotlinx.android.synthetic.main.top_actionbar.*
 
-class VideoPlayerActivity : AppCompatActivity(), View.OnClickListener,
+class VideoPlayerActivity : AppCompatActivity(), OnClickListener,
     MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener,
     MediaPlayer.OnInfoListener {
 
@@ -25,7 +24,7 @@ class VideoPlayerActivity : AppCompatActivity(), View.OnClickListener,
     var viewModel: VideoPlayerViewModel? = null
     var path: String = "videoplayer"
 
-    var mediaPlayer: MediaPlayer? = null
+    private var videoIsLoaded: Boolean = false
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,6 +41,7 @@ class VideoPlayerActivity : AppCompatActivity(), View.OnClickListener,
 
         tvTitle.text = "Video Application"
         tvDuration.visibility = GONE
+        tvNext.visibility = INVISIBLE
 
         ivBack.setOnClickListener(this)
         ivPlayPause.setOnClickListener(this)
@@ -56,7 +56,6 @@ class VideoPlayerActivity : AppCompatActivity(), View.OnClickListener,
        // vvVideo.setMediaController(this)
     }
 
-    @SuppressLint("SetTextI18n")
     override fun onInfo(mp: MediaPlayer?, what: Int, extra: Int): Boolean {
         when (what) {
             MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START -> {
@@ -78,6 +77,7 @@ class VideoPlayerActivity : AppCompatActivity(), View.OnClickListener,
 
     @SuppressLint("SetTextI18n")
     override fun onPrepared(mp: MediaPlayer?) {
+        videoIsLoaded = true
         loader.visibility = GONE
         tvDuration.text = "${vvVideo.duration/60000}:${vvVideo.duration%60}"
         ivThumb.visibility = VISIBLE
@@ -95,7 +95,6 @@ class VideoPlayerActivity : AppCompatActivity(), View.OnClickListener,
         return true
     }
 
-
     override fun onClick(v: View?) {
         when(v?.id) {
             R.id.ivBack -> {
@@ -110,7 +109,7 @@ class VideoPlayerActivity : AppCompatActivity(), View.OnClickListener,
                     vvVideo.seekTo(vvVideo.currentPosition + 10000)
                 } else {
                     vvVideo.seekTo(0)
-                    vvVideo.pause()
+//                    vvVideo.pause()
                     playView()
                 }
             }
@@ -120,7 +119,7 @@ class VideoPlayerActivity : AppCompatActivity(), View.OnClickListener,
                     vvVideo.seekTo(vvVideo.currentPosition - 10000)
                 } else {
                     vvVideo.seekTo(0)
-                    vvVideo.pause()
+//                    vvVideo.pause()
                     playView()
                 }
             }
@@ -131,12 +130,15 @@ class VideoPlayerActivity : AppCompatActivity(), View.OnClickListener,
     }
 
     private fun playPauseFunction() {
-        if(vvVideo.isPlaying) {
-            vvVideo.pause()
-            playView()
-        } else {
-            vvVideo.start()
-            pauseView()
+        if(videoIsLoaded) {
+        ivThumb.visibility = GONE
+        if (vvVideo.isPlaying) {
+                vvVideo.pause()
+                playView()
+            } else {
+                vvVideo.start()
+                pauseView()
+            }
         }
     }
 
@@ -165,7 +167,6 @@ class VideoPlayerActivity : AppCompatActivity(), View.OnClickListener,
     }
 
     //Views
-    @SuppressLint("SetTextI18n")
     private fun successView(apiResponse: VideoAPIResponse?) {
         noInternet.visibility = GONE
         val uri: Uri = Uri.parse(apiResponse?.data?.link.toString())
