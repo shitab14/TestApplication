@@ -105,6 +105,7 @@ class VideoPlayerActivity : AppCompatActivity(), View.OnClickListener,
                 playPauseFunction()
             }
             R.id.ivForward -> {
+                ivThumb.visibility = GONE
                 if(vvVideo.currentPosition + 11000 < vvVideo.duration) {
                     vvVideo.seekTo(vvVideo.currentPosition + 10000)
                 } else {
@@ -114,6 +115,7 @@ class VideoPlayerActivity : AppCompatActivity(), View.OnClickListener,
                 }
             }
             R.id.ivRewind -> {
+                ivThumb.visibility = GONE
                 if(vvVideo.currentPosition - 11000 > 0) {
                     vvVideo.seekTo(vvVideo.currentPosition - 10000)
                 } else {
