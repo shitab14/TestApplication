@@ -43,6 +43,7 @@ class VideoPlayerActivity : AppCompatActivity(), View.OnClickListener,
         }
 
         tvTitle.text = "Video Application"
+        tvDuration.visibility = GONE
 
         ivBack.setOnClickListener(this)
         ivPlayPause.setOnClickListener(this)
@@ -57,9 +58,11 @@ class VideoPlayerActivity : AppCompatActivity(), View.OnClickListener,
        // vvVideo.setMediaController(this)
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onInfo(mp: MediaPlayer?, what: Int, extra: Int): Boolean {
         when (what) {
             MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START -> {
+                tvDuration.text = "${vvVideo.duration/60000}:${vvVideo.duration%60}"
                 loader.visibility = GONE
                 return true
             }
@@ -158,10 +161,12 @@ class VideoPlayerActivity : AppCompatActivity(), View.OnClickListener,
     }
 
     //Views
+    @SuppressLint("SetTextI18n")
     private fun successView(apiResponse: VideoAPIResponse?) {
         noInternet.visibility = GONE
         val uri: Uri = Uri.parse(apiResponse?.data?.link.toString())
         vvVideo.setVideoURI(uri)
+        tvDuration.visibility = VISIBLE
     }
 
     private fun failView() {
