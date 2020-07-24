@@ -135,10 +135,6 @@ class VideoPlayerActivity : AppCompatActivity(), OnClickListener,
                     vvVideo.seekTo(vvVideo.currentPosition - 10000)
                 } else {
                     vvVideo.seekTo(1)
-                    if(!vvVideo.isPlaying) {
-                        vvVideo.pause()
-                    }
-                    playView()
                 }
             }
             R.id.ivRewind -> {
@@ -226,13 +222,16 @@ class VideoPlayerActivity : AppCompatActivity(), OnClickListener,
         val uri: Uri = Uri.parse(apiResponse?.data?.link.toString())
         vvVideo.setVideoURI(uri)
 
-        Picasso.with(context)
-            .load(apiResponse?.data?.thumb.toString())
-            .placeholder(android.R.color.black)
-            .error(R.drawable.ic_baseline_pause_circle_filled_24)
-            .fit()
-            .noFade()
-            .into(ivThumb)
+        try {
+            Picasso.with(context)
+                .load(apiResponse?.data?.thumb.toString())
+                .placeholder(android.R.color.black)
+                .error(R.drawable.ic_baseline_pause_circle_filled_24)
+                .fit()
+                .noFade()
+                .into(ivThumb)
+        } catch (e: Exception) {
+        }
     }
 
     private fun failView() {
