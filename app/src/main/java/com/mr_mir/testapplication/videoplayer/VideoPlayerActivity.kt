@@ -253,12 +253,12 @@ class VideoPlayerActivity : AppCompatActivity(), OnClickListener,
         ivPause.visibility = VISIBLE
     }
 
-    private fun getFormatTime(miliseconds: Int): String {
-        return "${miliseconds/60000}:${
-        if((miliseconds%60).toString().length == 1) {
-            "0"+(miliseconds%60).toString()
+    private fun getFormatTime(milliSeconds: Int): String {
+        return "${milliSeconds/60000}:${
+        if((milliSeconds%60).toString().length == 1) {
+            "0"+(milliSeconds%60).toString()
         } else {
-            (miliseconds%60).toString()
+            (milliSeconds%60).toString()
         }
         }"
     }
