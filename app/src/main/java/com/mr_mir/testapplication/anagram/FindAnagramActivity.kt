@@ -27,12 +27,17 @@ class FindAnagramActivity : AppCompatActivity(), View.OnClickListener {
     override fun onClick(v: View?) {
         when (v?.id) {
             R.id.tvFindAnagram -> {
-                if(findAnagram(etA.text.toString(), etB.text.toString())) {
-                    tvResults.text = "Yes an Anagram"
-                    tvResults.setTextColor(Color.GREEN)
+                if (etA.text.isEmpty() || etB.text.isEmpty()) {
+                    tvResults.text = "Fields empty"
+                    tvResults.setTextColor(Color.MAGENTA)
                 } else {
-                    tvResults.text = "Not an Anagram"
-                    tvResults.setTextColor(Color.RED)
+                    if (findAnagram(etA.text.toString(), etB.text.toString())) {
+                        tvResults.text = "Yes an Anagram"
+                        tvResults.setTextColor(Color.GREEN)
+                    } else {
+                        tvResults.text = "Not an Anagram"
+                        tvResults.setTextColor(Color.RED)
+                    }
                 }
             }
             R.id.tvNext -> {

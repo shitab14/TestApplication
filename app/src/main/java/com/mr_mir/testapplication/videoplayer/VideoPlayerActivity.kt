@@ -5,8 +5,10 @@ import android.content.Context
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
 import android.view.View
 import android.view.View.*
+import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -16,15 +18,18 @@ import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_video_player.*
 import kotlinx.android.synthetic.main.top_actionbar.*
 
+
 class VideoPlayerActivity : AppCompatActivity(), OnClickListener,
     MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener,
     MediaPlayer.OnInfoListener {
 
-    var context: Context = this
-    var viewModel: VideoPlayerViewModel? = null
-    var path: String = "videoplayer"
+    private var context: Context = this
+    private var viewModel: VideoPlayerViewModel? = null
+    private var path: String = "videoplayer"
 
     private var videoIsLoaded: Boolean = false
+
+    private var handler: Handler = Handler()
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,6 +52,7 @@ class VideoPlayerActivity : AppCompatActivity(), OnClickListener,
         ivPlayPause.setOnClickListener(this)
         ivForward.setOnClickListener(this)
         ivRewind.setOnClickListener(this)
+        ivRewind10.setOnClickListener(this)
         vvVideo.setOnPreparedListener(this)
         vvVideo.setOnCompletionListener(this)
         vvVideo.setOnErrorListener(this)
@@ -61,6 +67,7 @@ class VideoPlayerActivity : AppCompatActivity(), OnClickListener,
             MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START -> {
                 loader.visibility = GONE
                 ivThumb.visibility = GONE
+                updateProgressBar()
                 return true
             }
             MediaPlayer.MEDIA_INFO_BUFFERING_START -> {
@@ -79,13 +86,13 @@ class VideoPlayerActivity : AppCompatActivity(), OnClickListener,
     override fun onPrepared(mp: MediaPlayer?) {
         videoIsLoaded = true
         loader.visibility = GONE
-        tvDuration.text = "${vvVideo.duration/60000}:${vvVideo.duration%60}"
+        tvDuration.text = getFormatTime(vvVideo.duration)
         ivThumb.visibility = VISIBLE
         tvDuration.visibility = VISIBLE
     }
 
     override fun onCompletion(mp: MediaPlayer?) {
-        vvVideo.seekTo(0)
+        vvVideo.seekTo(1)
         vvVideo.pause()
         playView()
     }
@@ -108,20 +115,30 @@ class VideoPlayerActivity : AppCompatActivity(), OnClickListener,
                 if(vvVideo.currentPosition + 11000 < vvVideo.duration) {
                     vvVideo.seekTo(vvVideo.currentPosition + 10000)
                 } else {
-                    vvVideo.seekTo(0)
-//                    vvVideo.pause()
+                    vvVideo.seekTo(1)
+                    vvVideo.pause()
+                    playView()
+                }
+            }
+            R.id.ivRewind10 -> {
+                ivThumb.visibility = GONE
+                if(vvVideo.currentPosition - 11000 > 0) {
+                    vvVideo.seekTo(vvVideo.currentPosition - 10000)
+                } else {
+                    vvVideo.seekTo(1)
+                    if(!vvVideo.isPlaying) {
+                        vvVideo.pause()
+                    }
                     playView()
                 }
             }
             R.id.ivRewind -> {
                 ivThumb.visibility = GONE
-                if(vvVideo.currentPosition - 11000 > 0) {
-                    vvVideo.seekTo(vvVideo.currentPosition - 10000)
-                } else {
-                    vvVideo.seekTo(0)
-//                    vvVideo.pause()
-                    playView()
+                vvVideo.seekTo(1)
+                if(!vvVideo.isPlaying) {
+                    vvVideo.pause()
                 }
+                playView()
             }
             R.id.vvVideo -> {
                 playPauseFunction()
@@ -142,6 +159,36 @@ class VideoPlayerActivity : AppCompatActivity(), OnClickListener,
         }
     }
 
+    private fun updateProgressBar() {
+        handler.postDelayed(updateTimeTask, 100)
+    }
+
+    private val updateTimeTask: Runnable = object : Runnable {
+        override fun run() {
+//            tvCurrentTime.text = getFormatTime(vvVideo.currentPosition)
+            seeker.progress = vvVideo.currentPosition
+            seeker.max = vvVideo.duration
+            handler.postDelayed(this, 100)
+        }
+    }
+
+    /*fun onProgressChanged(
+        seekbar: SeekBar?,
+        progress: Int,
+        fromTouch: Boolean
+    ) {
+    }
+
+    fun onStartTrackingTouch(seekbar: SeekBar?) {
+        handler.removeCallbacks(updateTimeTask)
+    }
+
+    fun onStopTrackingTouch(seekbar: SeekBar?) {
+        handler.removeCallbacks(updateTimeTask)
+        vvVideo.seekTo(seeker.progress)
+        updateProgressBar()
+    }*/
+
     //API Call & Observer
     private fun loadVideo() {
         //Observer to Fetch Data
@@ -158,7 +205,6 @@ class VideoPlayerActivity : AppCompatActivity(), OnClickListener,
                         loaderView()
                     }
                 }
-                //viewModel?.removeSourceForData(path)
 
             })
 
@@ -205,6 +251,16 @@ class VideoPlayerActivity : AppCompatActivity(), OnClickListener,
     private fun pauseView() {
         ivPlay.visibility = GONE
         ivPause.visibility = VISIBLE
+    }
+
+    private fun getFormatTime(miliseconds: Int): String {
+        return "${miliseconds/60000}:${
+        if((miliseconds%60).toString().length == 1) {
+            "0"+(miliseconds%60).toString()
+        } else {
+            (miliseconds%60).toString()
+        }
+        }"
     }
 
 }
