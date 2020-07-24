@@ -28,13 +28,17 @@ class VideoPlayerActivity : AppCompatActivity(), OnClickListener,
     private var path: String = "videoplayer"
 
     private var videoIsLoaded: Boolean = false
-
+    private var savedApiResponse: VideoAPIResponse? = null
     private var handler: Handler = Handler()
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_video_player)
+    }
+
+    override fun onResume() {
+        super.onResume()
 
         viewModel = ViewModelProvider(this).get(VideoPlayerViewModel::class.java)
 
@@ -57,9 +61,9 @@ class VideoPlayerActivity : AppCompatActivity(), OnClickListener,
         vvVideo.setOnCompletionListener(this)
         vvVideo.setOnErrorListener(this)
         vvVideo.setOnInfoListener(this)
-        vvVideo.setOnClickListener(this)
+        llVideo.setOnClickListener(this)
 //        seeker.setProgress( vvVideo.currentPosition, true)
-       // vvVideo.setMediaController(this)
+        // vvVideo.setMediaController(this)
     }
 
     override fun onInfo(mp: MediaPlayer?, what: Int, extra: Int): Boolean {
@@ -98,7 +102,12 @@ class VideoPlayerActivity : AppCompatActivity(), OnClickListener,
     }
 
     override fun onError(mp: MediaPlayer?, what: Int, extra: Int): Boolean {
+        /*if(savedApiResponse != null) {
+            successView(savedApiResponse)
+        } else {
+        }*/
         UtilSingleton.showToast(context, "Something went wrong")
+
         return true
     }
 
@@ -135,12 +144,10 @@ class VideoPlayerActivity : AppCompatActivity(), OnClickListener,
             R.id.ivRewind -> {
                 ivThumb.visibility = GONE
                 vvVideo.seekTo(1)
-                if(!vvVideo.isPlaying) {
-                    vvVideo.pause()
-                }
+                vvVideo.pause()
                 playView()
             }
-            R.id.vvVideo -> {
+            R.id.llVideo -> {
                 playPauseFunction()
             }
         }
@@ -196,6 +203,7 @@ class VideoPlayerActivity : AppCompatActivity(), OnClickListener,
             ?.observe(this, Observer {
                 when (it.status) {
                     Resource.Status.SUCCESS -> {
+                        savedApiResponse = it.data
                         successView(it.data)
                     }
                     Resource.Status.ERROR -> {
